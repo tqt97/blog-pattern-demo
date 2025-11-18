@@ -3,7 +3,7 @@
 namespace App\Models;
 
 use App\Enums\PostStatus;
-use App\Traits\HasSlugRouteKey;
+use App\Traits\HasSlug;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -15,7 +15,9 @@ class Post extends Model
     /** @use HasFactory<\Database\Factories\PostFactory> */
     use HasFactory;
 
-    use HasSlugRouteKey;
+    use HasSlug;
+
+    protected static $slugFrom = 'title';
 
     protected $fillable = [
         'user_id',
