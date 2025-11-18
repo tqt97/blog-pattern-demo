@@ -7,7 +7,6 @@ enum PostStatus: string
     case DRAFT = 'draft';
     case PENDING = 'pending';
     case PUBLISHED = 'published';
-    case SPAM = 'spam';
 
     public function label(): string
     {
@@ -15,7 +14,6 @@ enum PostStatus: string
             self::DRAFT => 'Draft',
             self::PENDING => 'Pending',
             self::PUBLISHED => 'Published',
-            self::SPAM => 'Spam',
         };
     }
 
@@ -25,7 +23,6 @@ enum PostStatus: string
             self::DRAFT => 'secondary',
             self::PENDING => 'warning',
             self::PUBLISHED => 'success',
-            self::SPAM => 'danger',
         };
     }
 }
