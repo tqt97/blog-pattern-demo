@@ -17,7 +17,7 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained()->nullOnDelete();
             $table->foreignId('parent_id')->nullable()->constrained('comments')->nullOnDelete();
             $table->text('content');
-            $table->enum('status', ['pending', 'approved', 'rejected', 'spam'])->default('pending');
+            $table->enum('status', ['pending', 'approved', 'spam'])->default('pending');
             $table->softDeletes();
             $table->timestamps();
 
