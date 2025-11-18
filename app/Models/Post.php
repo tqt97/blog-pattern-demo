@@ -31,7 +31,6 @@ class Post extends Model
         'thumbnail',
         'meta_title',
         'meta_description',
-        'view_count',
     ];
 
     protected function casts(): array
