@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\PostStatus;
 use App\Traits\HasSlug;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -17,7 +18,9 @@ class Post extends Model
 
     use HasSlug;
 
-    protected static $slugFrom = 'title';
+    protected static string $slugFrom = 'title';
+
+    protected static bool $slugUniqueAcrossSoftDeleted = true;
 
     protected $fillable = [
         'user_id',
@@ -59,5 +62,11 @@ class Post extends Model
     public function tags(): BelongsToMany
     {
         return $this->belongsToMany(Tag::class, 'post_tag');
+    }
+
+    public function scopeGetFirstRecord(Builder $builder)
+    {
+
+        return $builder->whereKey($this->getKey())->lockForUpdate()->first();
     }
 }
