@@ -7,6 +7,7 @@ use App\Models\Post;
 use App\Repositories\Contracts\PostRepositoryInterface;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 
 class PostRepository extends BaseRepository implements PostRepositoryInterface
 {
@@ -89,5 +90,21 @@ class PostRepository extends BaseRepository implements PostRepositoryInterface
     public function incrementViewCount(int $id): void
     {
         $this->query()->whereKey($id)->increment('view_count');
+    }
+
+    public function topViewed(int $limit = 5): Collection
+    {
+        return $this->publishedQuery()
+            ->orderByDesc('view_count')
+            ->limit($limit)
+            ->get();
+    }
+
+    public function recentPublished(int $limit = 5): Collection
+    {
+        return $this->publishedQuery()
+            ->orderByDesc('published_at')
+            ->limit($limit)
+            ->get();
     }
 }

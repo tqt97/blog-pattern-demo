@@ -2,6 +2,7 @@
 
 namespace App\Actions\Post;
 
+use App\Cache\Domains\PostCache;
 use App\DTOs\Post\PostDTO;
 use App\Events\PostCreated;
 use App\Exceptions\PostException;
@@ -19,6 +20,7 @@ class CreatePostAction
     public function __construct(
         protected PostRepositoryInterface $postRepository,
         protected SyncPostTagsAction $syncPostTagsAction,
+        protected PostCache $postCache,
     ) {}
 
     public function __invoke(PostDTO $dto): Post
@@ -34,7 +36,10 @@ class CreatePostAction
                 ($this->syncPostTagsAction)($post, $dto->tagIds);
             }
 
-            DB::afterCommit(fn () => PostCreated::dispatch($post));
+            DB::afterCommit(function () use ($post) {
+                event(new PostCreated($post));
+                $this->postCache->flushAll();
+            });
 
             return $post;
         }, 'SERIALIZABLE', 3, 100);

@@ -5,6 +5,7 @@ namespace App\Repositories\Contracts;
 use App\DTOs\Post\PostFilter;
 use App\Models\Post;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Collection;
 
 interface PostRepositoryInterface extends BaseRepositoryInterface
 {
@@ -21,4 +22,8 @@ interface PostRepositoryInterface extends BaseRepositoryInterface
     public function exists(int $id): bool;
 
     public function incrementViewCount(int $id): void;
+
+    public function topViewed(int $limit = 5): Collection;
+
+    public function recentPublished(int $limit = 5): Collection;
 }

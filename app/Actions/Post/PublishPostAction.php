@@ -2,6 +2,7 @@
 
 namespace App\Actions\Post;
 
+use App\Cache\Domains\PostCache;
 use App\Events\PostPublished;
 use App\Exceptions\PostException;
 use App\Repositories\Contracts\PostRepositoryInterface;
@@ -16,6 +17,7 @@ class PublishPostAction
 
     public function __construct(
         protected PostRepositoryInterface $postRepository,
+        protected PostCache $postCache,
     ) {}
 
     public function __invoke(int $id, ?Carbon $publishAt = null): Model
@@ -46,6 +48,7 @@ class PublishPostAction
                 if ($justPublished) {
                     PostPublished::dispatch($post);
                 }
+                $this->postCache->flushAll();
             });
 
             return $post;

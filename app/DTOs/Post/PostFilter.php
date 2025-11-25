@@ -22,4 +22,15 @@ class PostFilter
             direction: $data['direction'] ?? 'desc',
         );
     }
+
+    public function toArray(): array
+    {
+        return [
+            'search' => $this->search,
+            'category_id' => $this->categoryId,
+            'status' => $this->status,
+            'order_by' => $this->orderBy,
+            'direction' => $this->direction,
+        ];
+    }
 }

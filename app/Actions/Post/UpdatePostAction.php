@@ -2,12 +2,14 @@
 
 namespace App\Actions\Post;
 
+use App\Cache\Domains\PostCache;
 use App\DTOs\Post\PostDTO;
 use App\Exceptions\PostException;
 use App\Models\Post;
 use App\Repositories\Contracts\PostRepositoryInterface;
 use App\Traits\AdvancedTransactional;
 use App\Traits\Transactional;
+use Illuminate\Support\Facades\DB;
 
 class UpdatePostAction
 {
@@ -17,6 +19,7 @@ class UpdatePostAction
     public function __construct(
         protected PostRepositoryInterface $postRepository,
         protected SyncPostTagsAction $syncPostTagsAction,
+        protected PostCache $postCache,
     ) {}
 
     public function __invoke(int $id, PostDTO $dto): Post
@@ -37,6 +40,8 @@ class UpdatePostAction
             if (! empty($dto->tagIds)) {
                 ($this->syncPostTagsAction)($post, $dto->tagIds);
             }
+
+            DB::afterCommit(fn () => $this->postCache->flushAll());
 
             return $post->fresh();
         }, 3, 100);
