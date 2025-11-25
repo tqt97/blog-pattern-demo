@@ -9,7 +9,6 @@ use App\Models\Post;
 use App\Repositories\Contracts\PostRepositoryInterface;
 use App\Traits\AdvancedTransactional;
 use App\Traits\Transactional;
-use Illuminate\Support\Facades\DB;
 
 class UpdatePostAction
 {
@@ -40,8 +39,6 @@ class UpdatePostAction
             if (! empty($dto->tagIds)) {
                 ($this->syncPostTagsAction)($post, $dto->tagIds);
             }
-
-            DB::afterCommit(fn () => $this->postCache->flushAll());
 
             return $post->fresh();
         }, 3, 100);

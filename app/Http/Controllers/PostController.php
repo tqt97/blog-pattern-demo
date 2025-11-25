@@ -35,14 +35,25 @@ class PostController extends Controller
     public function show(string $slug): View|Response
     {
         $post = $this->postService->getBySlug($slug);
-        $etag = md5($post->id.'|'.$post->updated_at);
+        // $etag = md5($post->id.'|'.$post->updated_at);
+        $etag = md5($post->id.'|'.$post->updated_at?->timestamp);
 
         if (request()->header('If-None-Match') === $etag) {
-            return response()->noContent(304);
+            return response()->noContent(Response::HTTP_NOT_MODIFIED)
+                ->setEtag($etag);
         }
 
-        $response = response()->view('posts.show', compact('post'));
-        $response->setEtag($etag);
+        $response = response()
+            ->view('posts.show', compact('post'))
+            ->setEtag($etag);
+
+        // Optional: Last-Modified
+        if ($post->updated_at) {
+            $response->setLastModified($post->updated_at);
+        }
+
+        // Optional: cho trình duyệt + proxy cache
+        $response->header('Cache-Control', 'public, max-age=60');
 
         IncrementPostViewJob::dispatch($post->id);
 

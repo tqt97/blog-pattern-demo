@@ -38,7 +38,6 @@ class CreatePostAction
 
             DB::afterCommit(function () use ($post) {
                 event(new PostCreated($post));
-                $this->postCache->flushAll();
             });
 
             return $post;

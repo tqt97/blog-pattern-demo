@@ -48,7 +48,6 @@ class PublishPostAction
                 if ($justPublished) {
                     PostPublished::dispatch($post);
                 }
-                $this->postCache->flushAll();
             });
 
             return $post;

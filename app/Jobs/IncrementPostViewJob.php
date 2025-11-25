@@ -4,11 +4,12 @@ namespace App\Jobs;
 
 use App\Actions\Post\IncrementPostViewCountAction;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Foundation\Queue\Queueable;
 
 class IncrementPostViewJob implements ShouldQueue
 {
-    use Queueable;
+    use Dispatchable, Queueable;
 
     /**
      * Create a new job instance.
