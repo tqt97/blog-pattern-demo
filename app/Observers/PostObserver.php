@@ -5,9 +5,9 @@ namespace App\Observers;
 use App\Cache\Domains\PostCache;
 use App\Jobs\PrewarmPostCacheJob;
 use App\Models\Post;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Contracts\Events\ShouldHandleEventsAfterCommit;
 
-class PostObserver
+class PostObserver implements ShouldHandleEventsAfterCommit
 {
     public function __construct(protected PostCache $postCache) {}
 
@@ -33,9 +33,7 @@ class PostObserver
 
     protected function flushAfterCommit(): void
     {
-        DB::afterCommit(function () {
-            $this->postCache->flushAll();
-            PrewarmPostCacheJob::dispatch();
-        });
+        $this->postCache->flushAll();
+        PrewarmPostCacheJob::dispatch();
     }
 }

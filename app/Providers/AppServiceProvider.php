@@ -5,6 +5,8 @@ namespace App\Providers;
 use App\Cache\Adapters\DbNamespacedCacheStore;
 use App\Cache\Adapters\RedisNamespacedCacheStore;
 use App\Cache\Contracts\NamespacedCacheStoreInterface;
+use App\Models\Post;
+use App\Observers\PostObserver;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -17,7 +19,6 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(NamespacedCacheStoreInterface::class, function ($app) {
             $default = config('cache.default');
 
-            // Tùy anh: có thể check theo store name như redis, memcached, dynamodb
             if (in_array($default, ['redis', 'memcached', 'dynamodb'], true)) {
                 return new RedisNamespacedCacheStore;
             }
@@ -31,6 +32,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        Post::observe(PostObserver::class);
     }
 }
