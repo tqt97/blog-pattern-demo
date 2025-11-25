@@ -31,7 +31,7 @@ class PostRepository extends BaseRepository implements PostRepositoryInterface
 
     public function paginatePublished(int $perPage = 15): LengthAwarePaginator
     {
-        return $this->query()
+        return $this->publishedQuery()
             ->orderByDesc('published_at')
             ->paginate($perPage);
     }
@@ -79,5 +79,15 @@ class PostRepository extends BaseRepository implements PostRepositoryInterface
         }
 
         return $query->exists();
+    }
+
+    public function exists(int $id): bool
+    {
+        return $this->query()->whereKey($id)->exists();
+    }
+
+    public function incrementViewCount(int $id): void
+    {
+        $this->query()->whereKey($id)->increment('view_count');
     }
 }

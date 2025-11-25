@@ -59,7 +59,7 @@ class PostService
         return ($this->updatePostAction)($id, $dto);
     }
 
-    public function publish(int $id, ?Carbon $at = null)
+    public function publish(int $id, ?Carbon $at = null): Post
     {
         return ($this->publishPostAction)($id, $at);
     }

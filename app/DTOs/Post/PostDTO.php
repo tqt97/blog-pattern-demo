@@ -30,7 +30,7 @@ class PostDTO
             categoryId: $data['category_id'] ?? null,
             userId: $data['user_id'] ?? null,
             tagIds: $data['tag_ids'] ?? [],
-            status: $data['status'] ?? PostStatus::DRAFT,
+            status: isset($data['status']) ? PostStatus::from($data['status']) : PostStatus::DRAFT,
         );
     }
 
@@ -44,7 +44,7 @@ class PostDTO
             'slug' => $this->slug,
             'content' => $this->content,
             'category_id' => $this->categoryId,
-            'author_id' => $this->userId,
+            'user_id' => $this->userId,
             'tag_ids' => $this->tagIds,
             'status' => $this->status,
         ];

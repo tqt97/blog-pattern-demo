@@ -6,6 +6,7 @@ use App\Actions\Post\IncrementPostViewCountAction;
 use App\Http\Requests\Post\FilterPostRequest;
 use App\Http\Requests\Post\StorePostRequest;
 use App\Http\Requests\Post\UpdatePostRequest;
+use App\Jobs\IncrementPostViewJob;
 use App\Models\Post;
 use App\Services\PostService;
 use Illuminate\Contracts\View\View;
@@ -20,7 +21,8 @@ class PostController extends Controller
 
     public function index(FilterPostRequest $request): View
     {
-        $posts = $this->postService->list($request->toFilter());
+        $filter = $request->toFilter();
+        $posts = $this->postService->list($filter);
 
         return view('posts.index', compact('posts', 'filter'));
     }
@@ -28,7 +30,8 @@ class PostController extends Controller
     public function show(string $slug): RedirectResponse|View
     {
         $post = $this->postService->getBySlug($slug);
-        ($this->incrementPostViewCountAction)($post->id);
+        // ($this->incrementPostViewCountAction)($post->id);
+        IncrementPostViewJob::dispatch($post->id);
 
         return view('posts.show', compact('post'));
     }

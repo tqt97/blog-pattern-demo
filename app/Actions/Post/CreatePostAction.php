@@ -37,6 +37,6 @@ class CreatePostAction
             DB::afterCommit(fn () => PostCreated::dispatch($post));
 
             return $post;
-        }, 'SERIALIZABLE');
+        }, 'SERIALIZABLE', 3, 100);
     }
 }

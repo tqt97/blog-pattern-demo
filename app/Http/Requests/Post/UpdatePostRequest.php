@@ -16,7 +16,7 @@ class UpdatePostRequest extends FormRequest
 
         // ví dụ: admin hoặc chính tác giả được sửa
         return $this->user()
-            && ($this->user()->isAdmin() || $this->user()->id === $post->author_id);
+            && ($this->user()->isAdmin() || $this->user()->id === $post->user_id);
     }
 
     /**
@@ -35,7 +35,7 @@ class UpdatePostRequest extends FormRequest
             'content' => ['required', 'string'],
             'status' => ['required', 'string', 'in:draft,pending,published'],
             'published_at' => ['nullable', 'datetime'],
-            'thumbnail' => ['nullable', 'string', 'mimetypes:image/jpeg,image/png', 'max:2048', 'dimensions:min_width=100,min_height=100'],
+            'thumbnail' => ['nullable', 'image', 'mimes:jpeg,png', 'max:2048', 'dimensions:min_width=100,min_height=100'],
             'meta_title' => ['nullable', 'string', 'max:255'],
             'meta_description' => ['nullable', 'string', 'max:255'],
             'tag_ids' => ['array'],

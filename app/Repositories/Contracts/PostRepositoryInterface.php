@@ -17,4 +17,8 @@ interface PostRepositoryInterface extends BaseRepositoryInterface
     public function findByIdForUpdate(int $id): ?Post;
 
     public function slugExists(string $slug, ?int $ignoreId = null): bool;
+
+    public function exists(int $id): bool;
+
+    public function incrementViewCount(int $id): void;
 }

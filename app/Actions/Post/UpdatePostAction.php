@@ -28,19 +28,6 @@ class UpdatePostAction
                 throw PostException::notFound((string) $id);
             }
 
-            // if slug change => check slug exists
-            // if ($post->slug !== $dto->slug) {
-            //     $slugExists = $this->postRepository
-            //         ->query()
-            //         ->where('slug', $dto->slug)
-            //         ->where('id', '!=', $post->id)
-            //         ->sharedLock()
-            //         ->exists();
-
-            //     if ($slugExists) {
-            //         throw PostException::slugExists($dto->slug);
-            //     }
-            // }
             if ($post->slug !== $dto->slug && $this->postRepository->slugExists($dto->slug, $post->id)) {
                 throw PostException::slugExists($dto->slug);
             }
@@ -52,6 +39,6 @@ class UpdatePostAction
             }
 
             return $post->fresh();
-        });
+        }, 3, 100);
     }
 }
