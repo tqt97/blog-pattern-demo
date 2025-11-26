@@ -23,16 +23,26 @@ class FilterPostRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'search' => ['nullable', 'string'],
+            'search' => ['nullable', 'string', 'max:255'],
             'category_id' => ['nullable', 'integer', 'exists:categories,id'],
-            'status' => ['nullable', 'in:draft,published'],
-            'order_by' => ['nullable', 'in:created_at,published_at,title'],
+            'status' => ['nullable', 'in:draft,pending,published'],
+            'user_id' => ['nullable', 'integer', 'exists:users,id'],
+            'only_published' => ['nullable', 'boolean'],
+            'order_by' => ['nullable', 'in:published_at,created_at,view_count'],
             'direction' => ['nullable', 'in:asc,desc'],
         ];
     }
 
     public function toFilter(): PostFilter
     {
-        return PostFilter::fromArray($this->validated());
+        // validated() đảm bảo dữ liệu đúng kiểu/format
+        $data = $this->validated();
+
+        // Nếu là frontend, có thể default only_published = true
+        if (! $this->has('only_published')) {
+            $data['only_published'] = true;
+        }
+
+        return PostFilter::fromArray($data);
     }
 }

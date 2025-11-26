@@ -3,7 +3,7 @@
 namespace App\Services;
 
 use App\DTOs\Post\PostDTO;
-use App\DTOs\Post\PostFilter;
+use App\DTOs\Post\PostFilterDTO;
 use App\Exceptions\PostException;
 use App\Models\Post;
 use App\Repositories\Contracts\PostRepositoryInterface;
@@ -22,7 +22,7 @@ class PostServiceOld
         protected PostRepositoryInterface $postRepository
     ) {}
 
-    public function list(PostFilter $filter, int $perPage = 15): LengthAwarePaginator
+    public function list(PostFilterDTO $filter, int $perPage = 15): LengthAwarePaginator
     {
         return $this->postRepository->paginate($filter, $perPage);
     }
@@ -78,8 +78,8 @@ class PostServiceOld
 
             $post = $this->postRepository->create($data->toArray());
 
-            if (! empty($data->tagIds)) {
-                $post->tags()->sync($data->tagIds);
+            if (! empty($data->tags)) {
+                $post->tags()->sync($data->tags);
             }
 
             return $this->postRepository->create($data->toArray());
@@ -154,8 +154,8 @@ class PostServiceOld
 
             $post->update($dto->toArray());
 
-            if (! empty($dto->tagIds)) {
-                $post->tags()->sync($dto->tagIds);
+            if (! empty($dto->tags)) {
+                $post->tags()->sync($dto->tags);
             }
 
             return $post->fresh();

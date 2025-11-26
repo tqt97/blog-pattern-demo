@@ -36,8 +36,8 @@ class UpdatePostAction
 
             $post->update($dto->toArray());
 
-            if (! empty($dto->tagIds)) {
-                ($this->syncPostTagsAction)($post, $dto->tagIds);
+            if (! empty($dto->tags)) {
+                ($this->syncPostTagsAction)($post, $dto->tags);
             }
 
             return $post->fresh();

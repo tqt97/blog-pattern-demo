@@ -2,8 +2,10 @@
 
 namespace App\Repositories\Eloquent;
 
-use App\DTOs\Post\PostFilter;
+use App\DTOs\Post\PostFilterDTO;
+use App\Filters\Domains\PostFilters;
 use App\Models\Post;
+use App\Repositories\Concerns\FilterableRepository;
 use App\Repositories\Contracts\PostRepositoryInterface;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
@@ -11,9 +13,16 @@ use Illuminate\Database\Eloquent\Collection;
 
 class PostRepository extends BaseRepository implements PostRepositoryInterface
 {
+    use FilterableRepository;
+
     public function __construct(Post $model)
     {
         parent::__construct($model);
+    }
+
+    public function filterClass(): string
+    {
+        return PostFilters::class;
     }
 
     protected function publishedQuery(): Builder
@@ -37,28 +46,12 @@ class PostRepository extends BaseRepository implements PostRepositoryInterface
             ->paginate($perPage);
     }
 
-    public function paginate(PostFilter $filter, int $perPage = 15): LengthAwarePaginator
+    public function paginate(PostFilterDTO $filter, int $perPage = 15): LengthAwarePaginator
     {
-        $query = $this->query();
+        $query = $this->query()->with('category');
+        $query = $this->applyFilters($query, $filter->toArray());
 
-        if ($filter->search) {
-            $query->where(function ($q) use ($filter) {
-                $q->where('title', 'like', "%{$filter->search}%")
-                    ->orWhere('content', 'like', "%{$filter->search}%");
-            });
-        }
-
-        if ($filter->categoryId) {
-            $query->where('category_id', $filter->categoryId);
-        }
-
-        if ($filter->status) {
-            $query->where('status', $filter->status);
-        }
-
-        return $query
-            ->orderBy($filter->orderBy ?? 'created_at', $filter->direction ?? 'desc')
-            ->paginate($perPage);
+        return $query->paginate($perPage);
     }
 
     public function findByIdForUpdate(int $id): ?Post

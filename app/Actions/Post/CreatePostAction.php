@@ -32,8 +32,8 @@ class CreatePostAction
 
             $post = $this->postRepository->create($dto->toArray());
 
-            if (! empty($dto->tagIds)) {
-                ($this->syncPostTagsAction)($post, $dto->tagIds);
+            if (! empty($dto->tags)) {
+                ($this->syncPostTagsAction)($post, $dto->tags);
             }
 
             DB::afterCommit(function () use ($post) {
