@@ -17,7 +17,9 @@ class Post extends Model
 
     use HasSlug;
 
-    protected static $slugFrom = 'title';
+    protected static string $slugFrom = 'title';
+
+    protected static bool $slugUniqueAcrossSoftDeleted = true;
 
     protected $fillable = [
         'user_id',

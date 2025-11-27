@@ -3,16 +3,15 @@
 namespace App\Traits;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
 
 trait HasSlug
 {
-    /**
-     * Bootstrap the trait.
-     *
-     * Listen for the creating and updating Model events. When either of these events are
-     * fired, the setSlugOnModel method is called.
-     */
+    protected static bool $useSlugAsRouteKey = false;
+
+    protected static bool $slugUniqueAcrossSoftDeleted = true;
+
     protected static function bootHasSlug(): void
     {
         static::creating(function (Model $model) {
@@ -20,16 +19,24 @@ trait HasSlug
         });
 
         static::updating(function (Model $model) {
+            $slugColumn = $model->getSlugColumn();
+            $sourceColumn = $model->getSlugSourceColumn();
+
+            if (
+                method_exists($model, 'isDirty')
+                && ! $model->isDirty($slugColumn)
+                && ! $model->isDirty($sourceColumn)
+            ) {
+                return;
+            }
+
             static::setSlugOnModel($model);
         });
     }
 
-    /**
-     * Set slug on model.
-     */
     protected static function setSlugOnModel(Model $model): void
     {
-        $slugColumn = $model->getSlugColumn();  // default 'slug'
+        $slugColumn = $model->getSlugColumn(); // default 'slug'
         $sourceColumn = $model->getSlugSourceColumn(); // default 'name'
 
         if (! empty($model->{$slugColumn})) {
@@ -44,18 +51,13 @@ trait HasSlug
             $baseSlug = Str::slug($sourceValue);
         }
 
-        // make sure slug is unique
         $uniqueSlug = static::makeUniqueSlug($model, $slugColumn, $baseSlug);
 
         $model->{$slugColumn} = $uniqueSlug;
     }
 
-    /**
-     * Generate a unique slug for a model.
-     */
     protected static function makeUniqueSlug(Model $model, string $slugColumn, string $baseSlug): string
     {
-        // if base slug is empty, generate random string
         $slug = $baseSlug !== '' ? $baseSlug : Str::random(8);
         $originalSlug = $slug;
         $i = 1;
@@ -68,9 +70,6 @@ trait HasSlug
         return $slug;
     }
 
-    /**
-     * Check if a slug already exists in the database.
-     */
     protected static function slugExists(Model $model, string $slugColumn, string $slug): bool
     {
         $query = static::query()->where($slugColumn, $slug);
@@ -79,15 +78,16 @@ trait HasSlug
             $query->whereKeyNot($model->getKey());
         }
 
+        if (
+            in_array(SoftDeletes::class, class_uses_recursive($model), true)
+            && ! static::$slugUniqueAcrossSoftDeleted
+        ) {
+            $query->whereNull($model->getQualifiedDeletedAtColumn());
+        }
+
         return $query->exists();
     }
 
-    /**
-     * Get the column name that will be used to generate slug.
-     *
-     * It will look for a static property named 'slugFrom' first, and if it exists and is not empty,
-     * it will return the value of that property. Otherwise, it will return 'name' as the default value.
-     */
     public function getSlugSourceColumn(): string
     {
         if (property_exists($this, 'slugFrom') && ! empty(static::$slugFrom)) {
@@ -97,12 +97,6 @@ trait HasSlug
         return 'name';
     }
 
-    /**
-     * Get the column name that will be used to store the generated slug.
-     *
-     * It will look for a static property named 'slugColumn' first, and if it exists and is not empty,
-     * it will return the value of that property. Otherwise, it will return 'slug' as the default value.
-     */
     public function getSlugColumn(): string
     {
         if (property_exists($this, 'slugColumn') && ! empty(static::$slugColumn)) {
@@ -112,15 +106,12 @@ trait HasSlug
         return 'slug';
     }
 
-    /**
-     * Get the route key name for the model.
-     *
-     * This method returns the value of the column name that is used to store the generated slug.
-     * This value is used to generate the route key name for the model. For example, if the column name
-     * is 'slug', the route key name will be 'slug'.
-     */
     public function getRouteKeyName(): string
     {
-        return $this->getSlugColumn();
+        if (static::$useSlugAsRouteKey) {
+            return $this->getSlugColumn();
+        }
+
+        return parent::getRouteKeyName();
     }
 }
