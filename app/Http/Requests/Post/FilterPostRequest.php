@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests\Post;
 
-use App\DTOs\Post\PostFilter;
+use App\DTOs\Post\PostFilterDTO;
 use Illuminate\Foundation\Http\FormRequest;
 
 class FilterPostRequest extends FormRequest
@@ -33,7 +33,7 @@ class FilterPostRequest extends FormRequest
         ];
     }
 
-    public function toFilter(): PostFilter
+    public function toFilter(): PostFilterDTO
     {
         // validated() đảm bảo dữ liệu đúng kiểu/format
         $data = $this->validated();
@@ -43,6 +43,6 @@ class FilterPostRequest extends FormRequest
             $data['only_published'] = true;
         }
 
-        return PostFilter::fromArray($data);
+        return PostFilterDTO::fromArray($data);
     }
 }

@@ -9,6 +9,7 @@ use App\Filters\Contracts\QueryFilter;
 use App\Filters\Domains\PostFilters;
 use App\Models\Post;
 use App\Observers\PostObserver;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -40,5 +41,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Post::observe(PostObserver::class);
+        Model::preventLazyLoading(! $this->app->isProduction());
+        Model::preventSilentlyDiscardingAttributes(! $this->app->isProduction());
     }
 }

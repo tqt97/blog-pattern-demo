@@ -7,7 +7,7 @@ use App\Actions\Post\PublishPostAction;
 use App\Actions\Post\UpdatePostAction;
 use App\Cache\Domains\PostCache;
 use App\DTOs\Post\PostDTO;
-use App\DTOs\Post\PostFilter;
+use App\DTOs\Post\PostFilterDTO;
 use App\Exceptions\PostException;
 use App\Models\Post;
 use App\Repositories\Contracts\PostRepositoryInterface;
@@ -25,7 +25,7 @@ class PostService
         protected PostCache $postCache,
     ) {}
 
-    public function list(PostFilter $filter, int $perPage = 15): LengthAwarePaginator
+    public function list(PostFilterDTO $filter, int $perPage = 15): LengthAwarePaginator
     {
         return $this->postCache->rememberList(
             $filter,
