@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\PostController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
@@ -18,3 +19,21 @@ Route::middleware('auth')->group(function () {
 });
 
 require __DIR__.'/auth.php';
+
+Route::resource('posts', PostController::class);
+
+Route::resource('blog', PostController::class)
+    ->parameters(['blog' => 'post'])
+    ->scoped(['post' => 'slug']);
+
+// Route::prefix('admin')->name('admin.')->group(function () {
+//     Route::resource('posts', AdminPostController::class);
+
+//     // route publish riêng
+//     Route::post('posts/{post}/publish', [AdminPostController::class, 'publish'])
+//         ->name('posts.publish');
+
+// Route::post('posts/{post}/publish', [AdminPostController::class, 'publish'])
+//     ->name('posts.publish')
+//     ->middleware('can:publish,post'); // <- check quyền tại route
+// });
