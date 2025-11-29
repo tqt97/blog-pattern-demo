@@ -6,7 +6,7 @@ use App\Filters\Eloquent\Base\EloquentFilters;
 
 class TagFilter extends EloquentFilters
 {
-    protected array $searchable = ['name', 'description'];
+    protected array $searchable = ['name'];
 
     protected array $sortable = ['name', 'created_at'];
 }
