@@ -2,6 +2,7 @@
 
 use App\Exceptions\PostException;
 use App\Exceptions\RepositoryException;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -13,6 +14,14 @@ return Application::configure(basePath: dirname(__DIR__))
         web: __DIR__.'/../routes/web.php',
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
+        then: function () {
+            Route::middleware(['web', 'auth'])
+                ->prefix('admin')
+                ->name('admin.')
+                // ->namespace('App\Http\Controllers\Admin')
+                ->as('admin.')
+                ->group(base_path('routes/admin.php'));
+        },
     )
     ->withMiddleware(function (Middleware $middleware): void {
         //
@@ -42,5 +51,11 @@ return Application::configure(basePath: dirname(__DIR__))
                 500,
                 $e->getMessage(),
             );
+        });
+
+        Model::handleLazyLoadingViolationUsing(function (Model $model, string $relation) {
+            $class = $model::class;
+
+            info("Attempted to lazy load [{$relation}] on model [{$class}].");
         });
     })->create();

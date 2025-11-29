@@ -1,6 +1,6 @@
 <?php
 
-namespace App\DTOs\Post;
+namespace App\DTOs\Domains\Post;
 
 use App\Enums\PostSortable;
 use App\Enums\SortDirection;

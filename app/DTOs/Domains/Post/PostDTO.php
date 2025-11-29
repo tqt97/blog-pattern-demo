@@ -1,6 +1,6 @@
 <?php
 
-namespace App\DTOs\Post;
+namespace App\DTOs\Domains\Post;
 
 use Carbon\Carbon;
 use Illuminate\Http\Request;

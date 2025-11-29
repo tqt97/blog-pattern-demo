@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filters;
+namespace App\Filters\Eloquent\Base;
 
 use App\Filters\Contracts\QueryFilter;
 use Illuminate\Database\Eloquent\Builder;
@@ -22,6 +22,7 @@ abstract class QueryFilters implements QueryFilter
         $this->data = $data;
 
         $allowed = $this->allowed();
+        $map = $this->map();
 
         foreach ($this->data as $key => $value) {
             if ($value === null || $value === '') {
@@ -32,7 +33,7 @@ abstract class QueryFilters implements QueryFilter
                 continue;
             }
 
-            $method = $this->map()[$key] ?? $key;
+            $method = $map[$key] ?? $key;
 
             if (method_exists($this, $method)) {
                 $this->{$method}($value);
