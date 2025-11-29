@@ -27,11 +27,11 @@ abstract class EloquentFilters extends QueryFilters
     protected function allowed(): array
     {
         return [
-            'search',
+            'q',
             'sort',
             'direction',
-            'from_date',
-            'to_date',
+            // 'from_date',
+            // 'to_date',
         ];
     }
 
@@ -44,8 +44,9 @@ abstract class EloquentFilters extends QueryFilters
     protected function map(): array
     {
         return [
-            'from_date' => 'dateFrom',
-            'to_date' => 'dateTo',
+            'q' => 'search',
+            // 'from_date' => 'dateFrom',
+            // 'to_date' => 'dateTo',
         ];
     }
 
@@ -85,34 +86,34 @@ abstract class EloquentFilters extends QueryFilters
         );
     }
 
-    /**
-     * Filter records by date greater than or equal to given value.
-     *
-     * The date column to filter by can be changed by setting the $dateColumn
-     * property.
-     *
-     * @param  string  $value  The date value to filter by.
-     */
-    public function dateFrom(string $value): void
-    {
-        if (! $this->dateColumn) {
-            return;
-        }
+    // /**
+    //  * Filter records by date greater than or equal to given value.
+    //  *
+    //  * The date column to filter by can be changed by setting the $dateColumn
+    //  * property.
+    //  *
+    //  * @param  string  $value  The date value to filter by.
+    //  */
+    // public function dateFrom(string $value): void
+    // {
+    //     if (! $this->dateColumn) {
+    //         return;
+    //     }
 
-        $this->whereDateFrom($this->dateColumn, $value);
-    }
+    //     $this->whereDateFrom($this->dateColumn, $value);
+    // }
 
-    /**
-     * Filter records by date less than or equal to given value.
-     *
-     * @param  string  $value  The date value to filter by.
-     */
-    public function dateTo(string $value): void
-    {
-        if (! $this->dateColumn) {
-            return;
-        }
+    // /**
+    //  * Filter records by date less than or equal to given value.
+    //  *
+    //  * @param  string  $value  The date value to filter by.
+    //  */
+    // public function dateTo(string $value): void
+    // {
+    //     if (! $this->dateColumn) {
+    //         return;
+    //     }
 
-        $this->whereDateTo($this->dateColumn, $value);
-    }
+    //     $this->whereDateTo($this->dateColumn, $value);
+    // }
 }

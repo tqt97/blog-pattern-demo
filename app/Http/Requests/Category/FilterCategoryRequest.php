@@ -23,11 +23,9 @@ class FilterCategoryRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'search' => ['nullable', 'string', 'max:255'],
+            'q' => ['nullable', 'string', 'max:255'],
             'sort' => ['nullable', 'string', 'max:255', 'in:created_at,updated_at,name'],
             'direction' => ['nullable', 'string', 'max:255', 'in:asc,desc'],
-            // 'from_date' => ['nullable', 'date'],
-            // 'to_date'   => ['nullable', 'date', 'after_or_equal:from_date'],
             'per_page' => ['nullable', 'integer', 'min:1', 'max:100'],
         ];
     }
@@ -35,7 +33,7 @@ class FilterCategoryRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'sort.in' => 'Colum sort invalid.',
+            'sort.in' => 'Column sort invalid.',
             'direction.in' => 'Direction invalid.',
         ];
     }

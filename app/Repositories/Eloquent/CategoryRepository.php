@@ -23,11 +23,11 @@ class CategoryRepository extends BaseRepository implements CategoryRepositoryInt
         return CategoryFilter::class;
     }
 
-    public function paginate(CategoryFilterDTO $filter, int $perPage = 15): LengthAwarePaginator
+    public function paginate(CategoryFilterDTO $filter): LengthAwarePaginator
     {
         $query = $this->query()->select(['id', 'name', 'description', 'created_at']);
         $query = $this->applyFilters($query, $filter->toArray());
 
-        return $query->paginate($perPage);
+        return $query->paginate($filter->perPage);
     }
 }

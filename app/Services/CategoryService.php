@@ -14,9 +14,9 @@ class CategoryService
         protected CategoryRepositoryInterface $categoryRepository,
     ) {}
 
-    public function list(CategoryFilterDTO $filter, int $perPage = 15): LengthAwarePaginator
+    public function list(CategoryFilterDTO $filter): LengthAwarePaginator
     {
-        return $this->categoryRepository->paginate($filter, $perPage);
+        return $this->categoryRepository->paginate($filter);
     }
 
     public function create(CategoryDTO $dto): Category

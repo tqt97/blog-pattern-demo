@@ -7,5 +7,5 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 interface CategoryRepositoryInterface extends BaseRepositoryInterface
 {
-    public function paginate(CategoryFilterDTO $filter, int $perPage = 15): LengthAwarePaginator;
+    public function paginate(CategoryFilterDTO $filter): LengthAwarePaginator;
 }
