@@ -2,8 +2,11 @@
 
 namespace App\Http\Requests\Post;
 
-use App\DTOs\Post\PostDTO;
+use App\DTOs\Domains\Post\PostDTO;
+use App\Enums\PostStatus;
+use App\Rules\ValidPublishedAt;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Carbon;
 
 class UpdatePostRequest extends FormRequest
 {
@@ -12,11 +15,12 @@ class UpdatePostRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        $post = $this->route('post'); // Post model (route model binding)
+        // $post = $this->route('post'); // Post model (route model binding)
 
-        // ví dụ: admin hoặc chính tác giả được sửa
-        return $this->user()
-            && ($this->user()->isAdmin() || $this->user()->id === $post->user_id);
+        // // ví dụ: admin hoặc chính tác giả được sửa
+        // return $this->user()
+        //     && ($this->user()->isAdmin() || $this->user()->id === $post->user_id);
+        return true;
     }
 
     /**
@@ -31,11 +35,11 @@ class UpdatePostRequest extends FormRequest
             'category_id' => ['nullable', 'integer', 'exists:categories,id'],
             'title' => ['required', 'string', 'max:255'],
             'slug' => ['nullable', 'string', 'max:255'], // có thể để null, trait HasSlug lo
-            'excerpt' => ['required', 'string'],
+            'excerpt' => ['nullable', 'string'],
             'content' => ['required', 'string'],
-            'status' => ['required', 'string', 'in:draft,pending,published'],
-            'published_at' => ['nullable', 'datetime'],
-            'thumbnail' => ['nullable', 'image', 'mimes:jpeg,png', 'max:2048', 'dimensions:min_width=100,min_height=100'],
+            'status' => ['required', PostStatus::rule()],
+            'published_at' => [new ValidPublishedAt($this->input('status'))],
+            'thumbnail' => ['nullable', 'string', 'max:255'],
             'meta_title' => ['nullable', 'string', 'max:255'],
             'meta_description' => ['nullable', 'string', 'max:255'],
             'tag_ids' => ['array'],
@@ -52,6 +56,14 @@ class UpdatePostRequest extends FormRequest
 
     public function toDto(): PostDTO
     {
-        return PostDTO::fromArray($this->validated());
+        $data = $this->validated();
+
+        if (! empty($data['published_at'])) {
+            $data['published_at'] = Carbon::parse($data['published_at']);
+        } else {
+            $data['published_at'] = null;
+        }
+
+        return PostDTO::fromArray($data);
     }
 }

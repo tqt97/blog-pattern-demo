@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Actions\Post\IncrementPostViewCountAction;
 use App\Cache\Domains\PostCache;
-use App\Http\Requests\Post\FilterPostRequest;
 use App\Http\Requests\Post\StorePostRequest;
 use App\Http\Requests\Post\UpdatePostRequest;
 use App\Jobs\IncrementPostViewJob;
@@ -12,6 +11,7 @@ use App\Models\Post;
 use App\Services\PostService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
 class PostController extends Controller
@@ -22,7 +22,7 @@ class PostController extends Controller
         protected PostCache $postCache
     ) {}
 
-    public function index(FilterPostRequest $request): View
+    public function index(Request $request): View
     {
         $filter = $request->toFilter();
         $posts = $this->postService->list($filter);
@@ -69,21 +69,21 @@ class PostController extends Controller
 
     public function update(UpdatePostRequest $request, Post $post): RedirectResponse
     {
-        $this->postService->update($post->id, $request->toDto());
+        $this->postService->update($post, $request->toDto());
 
         return back()->with('success', 'Updated');
     }
 
-    public function destroy($id): RedirectResponse
+    public function destroy(Post $post): RedirectResponse
     {
-        $this->postService->delete($id);
+        $this->postService->delete($post);
 
         return back()->with('success', 'Deleted');
     }
 
     public function publish(Post $post): RedirectResponse
     {
-        $this->postService->publish($post->id);
+        $this->postService->publish($post);
 
         return back()->with('success', 'Post published');
     }

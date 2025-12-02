@@ -2,6 +2,9 @@
 
 namespace App\DTOs;
 
+use Illuminate\Support\Arr;
+use Illuminate\Support\Str;
+
 abstract class BaseDTO
 {
     public static function fromArray(array $data): static
@@ -31,8 +34,15 @@ abstract class BaseDTO
         return $reflection->newInstanceArgs($args);
     }
 
-    public function toArray(): array
+    public function toArray(array $except = []): array
     {
-        return get_object_vars($this);
+        return Arr::except(get_object_vars($this), $except);
+    }
+
+    public function toSnakeArray(): array
+    {
+        return collect($this->toArray())
+            ->mapWithKeys(fn ($value, $key) => [Str::snake($key) => $value])
+            ->all();
     }
 }

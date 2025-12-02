@@ -2,8 +2,11 @@
 
 namespace App\Http\Requests\Post;
 
-use App\DTOs\Post\PostDTO;
+use App\DTOs\Domains\Post\PostDTO;
+use App\Enums\PostStatus;
+use App\Rules\ValidPublishedAt;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Carbon;
 
 class StorePostRequest extends FormRequest
 {
@@ -12,7 +15,8 @@ class StorePostRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return $this->user()?->hasAnyRole(['admin', 'editor']) ?? false;
+        // return $this->user()?->hasAnyRole(['admin', 'editor']) ?? false;
+        return true;
     }
 
     /**
@@ -27,11 +31,11 @@ class StorePostRequest extends FormRequest
             'category_id' => ['nullable', 'integer', 'exists:categories,id'],
             'title' => ['required', 'string', 'max:255'],
             'slug' => ['nullable', 'string', 'max:255'], // có thể để null, trait HasSlug lo
-            'excerpt' => ['required', 'string'],
+            'excerpt' => ['nullable', 'string'],
             'content' => ['required', 'string'],
-            'status' => ['required', 'string', 'in:draft,pending,published'],
-            'published_at' => ['nullable', 'datetime'],
-            'thumbnail' => ['nullable', 'image', 'mimes:jpeg,png', 'max:2048', 'dimensions:min_width=100,min_height=100'],
+            'status' => ['required', PostStatus::rule()],
+            'published_at' => [new ValidPublishedAt($this->input('status'))],
+            'thumbnail' => ['nullable', 'string', 'max:255'],
             'meta_title' => ['nullable', 'string', 'max:255'],
             'meta_description' => ['nullable', 'string', 'max:255'],
             'tag_ids' => ['array'],
@@ -48,6 +52,15 @@ class StorePostRequest extends FormRequest
 
     public function toDto(): PostDTO
     {
-        return PostDTO::fromArray($this->validated());
+        $data = $this->validated(); // hoặc all()
+
+        if (! empty($data['published_at'])) {
+            // input type="datetime-local" trả dạng Y-m-d\TH:i
+            $data['published_at'] = Carbon::parse($data['published_at']);
+        } else {
+            $data['published_at'] = null;
+        }
+
+        return PostDTO::fromArray($data);
     }
 }

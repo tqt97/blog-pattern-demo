@@ -4,8 +4,10 @@ namespace App\Repositories\Eloquent;
 
 use App\Repositories\Contracts\BaseRepositoryInterface;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 abstract class BaseRepository implements BaseRepositoryInterface
 {
@@ -32,6 +34,14 @@ abstract class BaseRepository implements BaseRepositoryInterface
         return $model;
     }
 
+    public function save(Model $model): bool
+    {
+        $saved = $model->save();
+        $model->refresh();
+
+        return $saved;
+    }
+
     public function create(array $attributes): Model
     {
         return $this->query()->create($attributes);
@@ -51,5 +61,18 @@ abstract class BaseRepository implements BaseRepositoryInterface
         $model = $this->findOrFail($id);
 
         return (bool) $model->delete();
+    }
+
+    public function findManyByIds(array $ids, bool $withTrashed = false): Collection
+    {
+        $query = $this->query();
+
+        if ($withTrashed && in_array(SoftDeletes::class, class_uses_recursive($this->model))) {
+            $query->withTrashed();
+        }
+
+        return $query
+            ->whereIn($this->model->getKeyName(), $ids)
+            ->get();
     }
 }
