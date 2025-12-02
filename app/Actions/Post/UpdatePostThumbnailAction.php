@@ -25,7 +25,7 @@ class UpdatePostThumbnailAction
         }
 
         // 3. Update DB
-        $this->posts->update($post, [
+        $this->posts->update($post->id, [
             'thumbnail' => $uploaded->relative,
         ]);
 
