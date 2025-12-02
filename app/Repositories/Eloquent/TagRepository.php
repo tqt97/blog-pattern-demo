@@ -25,7 +25,8 @@ class TagRepository extends BaseRepository implements TagRepositoryInterface
 
     public function paginate(TagFilterDTO $filter): LengthAwarePaginator
     {
-        $query = $this->query()->select(['id', 'name', 'created_at']);
+        $query = $this->query()->select(['id', 'name', 'created_at'])
+            ->withCount(['posts']);
         $query = $this->applyFilters($query, $filter->toArray());
 
         return $query->paginate($filter->perPage);

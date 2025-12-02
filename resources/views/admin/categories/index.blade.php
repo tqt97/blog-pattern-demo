@@ -9,7 +9,7 @@
 
             {{-- Filters --}}
             <x-filters :action="route('admin.categories.index')" :baseExcept="['page']" class="w-full flex items-center gap-1 justify-between">
-                <div class="flex items-center gap-2">
+                <div class="flex items-center gap-1">
                     <x-filters.per-page />
 
                     <x-filters.select-field name="sort" :options="[
@@ -40,6 +40,7 @@
                         <x-table.thead>
                             <x-table.th column="Name" field="name" />
                             <x-table.th column="Description" />
+                            <x-table.th column="Posts" />
                             <x-table.th column="Created At" field="created_at" />
                             <x-table.th />
                         </x-table.thead>
@@ -48,6 +49,7 @@
                                 <x-table.tr>
                                     <x-table.td value="{{ $category->name }}" />
                                     <x-table.td value="{{ $category->description }}" />
+                                    <x-table.td value="{{ $category->posts_count }}" />
                                     <x-table.td value="{{ $category->created_at->diffForHumans() }}" />
                                     <x-table.td class="text-right flex items-center justify-end gap-1">
                                         <a href="{{ route('admin.categories.edit', $category) }}"
