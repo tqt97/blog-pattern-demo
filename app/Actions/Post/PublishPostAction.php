@@ -3,6 +3,7 @@
 namespace App\Actions\Post;
 
 use App\Cache\Domains\PostCache;
+use App\Enums\PostStatus;
 use App\Events\PostPublished;
 use App\Exceptions\PostException;
 use App\Repositories\Contracts\PostRepositoryInterface;
@@ -29,20 +30,25 @@ class PublishPostAction
                 throw PostException::notFound((string) $id);
             }
 
-            // current state
-            $wasPublished = (bool) $post->is_published;
+            $wasPublished = $post->status instanceof PostStatus
+                ? $post->status === PostStatus::PUBLISHED
+                : $post->status === PostStatus::PUBLISHED->value;
 
-            // Set new state
-            $post->is_published = true;
+            // Set trạng thái mới
+            $post->status = PostStatus::PUBLISHED;
 
-            // if has published_at field => use it; else use current time
-            $post->published_at = $post->published_at ?: ($publishAt ?: now());
+            if (! $post->published_at) {
+                $post->published_at = $publishAt ?: now();
+            }
+
             $post->save();
-
             $post->refresh();
 
-            // only dispatch "publish" if just published
-            $justPublished = ! $wasPublished && (bool) $post->is_published;
+            $isNowPublished = $post->status instanceof PostStatus
+                ? $post->status === PostStatus::PUBLISHED
+                : $post->status === PostStatus::PUBLISHED->value;
+
+            $justPublished = ! $wasPublished && $isNowPublished;
 
             DB::afterCommit(function () use ($post, $justPublished) {
                 if ($justPublished) {

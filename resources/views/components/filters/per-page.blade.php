@@ -6,13 +6,12 @@
 
 <x-filters.form :except="[$name]" class="flex items-center gap-2">
     <div class="flex gap-1 items-center justify-center">
-        Show:
         <select name="{{ $name }}"
-            class="w-[80px] rounded-md border-gray-300 shadow-sm text-sm focus:border-indigo-500 focus:ring-indigo-500"
+            class="rounded-md border-gray-300 shadow-sm text-sm focus:border-gray-500 focus:ring-gray-500"
             onchange="this.form.submit()">
             @foreach ($options as $size)
                 <option value="{{ $size }}" @selected(request($name, $default) == $size)>
-                    {{ $size }}
+                    {{ $size }} {{ Str::plural('record', $size) }}
                 </option>
             @endforeach
         </select>

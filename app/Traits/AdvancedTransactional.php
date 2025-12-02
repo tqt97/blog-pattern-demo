@@ -12,7 +12,7 @@ trait AdvancedTransactional
     /**
      * Run callback in a transaction with custom isolation level.
      *
-     * Ví dụ:
+     * Example:
      * $this->inTransactionWithIsolation(function () {
      *     // ... logic create / update ...
      * }, 'SERIALIZABLE', attempts: 3);
@@ -20,8 +20,6 @@ trait AdvancedTransactional
      * @see https://dev.mysql.com/doc/refman/8.0/en/innodb-locking-reads.html
      *
      * @param  string  $isolation  READ COMMITTED | REPEATABLE READ | SERIALIZABLE
-     * @param  int  $attempts  Số lần retry khi gặp deadlock / serialization failure
-     * @param  int  $sleepMilliseconds  Thời gian ngủ giữa các lần retry (ms)
      * @return mixed
      *
      * @throws Throwable
@@ -32,10 +30,10 @@ trait AdvancedTransactional
         int $attempts = 1,
         int $sleepMilliseconds = 50,
     ) {
-        // Lấy isolation hiện tại (MySQL 8: transaction_isolation)
-        // Nếu cần compat MySQL cũ có thể dùng @@tx_isolation.
         $originalIsolationRow = DB::selectOne('SELECT @@SESSION.transaction_isolation AS isolation');
         $originalIsolation = $originalIsolationRow->isolation ?? null;
+
+        $isolation = $this->normalizeIsolation($isolation);
 
         $attempt = 0;
 
@@ -43,7 +41,6 @@ trait AdvancedTransactional
             $attempt++;
 
             try {
-                // Đặt isolation BEFORE transaction
                 DB::statement("SET SESSION TRANSACTION ISOLATION LEVEL {$isolation}");
 
                 DB::beginTransaction();
@@ -57,35 +54,33 @@ trait AdvancedTransactional
                 DB::rollBack();
 
                 if (! $this->shouldRetryTransaction($e, $attempt, $attempts)) {
-                    // Restore isolation trước khi quăng exception
                     if ($originalIsolation) {
-                        DB::statement("SET SESSION TRANSACTION ISOLATION LEVEL {$originalIsolation}");
+                        DB::statement(
+                            'SET SESSION TRANSACTION ISOLATION LEVEL '.$this->normalizeIsolation($originalIsolation)
+                        );
                     }
 
                     throw $e;
                 }
 
-                // Backoff nhẹ giữa các lần retry
                 if ($sleepMilliseconds > 0) {
-                    // Nhân với attempt cho exponential backoff nhẹ
                     usleep($sleepMilliseconds * 1000 * $attempt);
                 }
-
-                // Lặp để retry lần tiếp theo
             } finally {
-                // Sau khi thành công hoặc hết attempt, restore isolation
                 if ($originalIsolation) {
-                    DB::statement("SET SESSION TRANSACTION ISOLATION LEVEL {$originalIsolation}");
+                    DB::statement(
+                        'SET SESSION TRANSACTION ISOLATION LEVEL '.$this->normalizeIsolation($originalIsolation)
+                    );
                 }
             }
         }
     }
 
     /**
-     * Run callback in a transaction (mặc định isolation của session),
-     * thường dùng với các query đã tự lock bằng lockForUpdate() bên trong callback.
+     * Run callback in a transaction (default isolation of session),
+     * usually used for create / update.
      *
-     * Ví dụ:
+     * Example:
      * $this->lockAndExecute(function () {
      *     $post = $this->postRepository->query()
      *         ->whereKey($id)
@@ -103,7 +98,6 @@ trait AdvancedTransactional
         int $attempts = 1,
         int $sleepMilliseconds = 50,
     ) {
-        // Giữ isolation hiện tại, chỉ thêm retry logic
         return $this->inTransactionWithIsolation(
             $callback,
             isolation: $this->getCurrentSessionIsolation(),
@@ -112,9 +106,6 @@ trait AdvancedTransactional
         );
     }
 
-    /**
-     * Quyết định có retry transaction hay không dựa trên loại lỗi + số attempt.
-     */
     protected function shouldRetryTransaction(Throwable $e, int $attempt, int $maxAttempts): bool
     {
         if ($attempt >= $maxAttempts) {
@@ -125,10 +116,10 @@ trait AdvancedTransactional
             return false;
         }
 
-        $sqlState = $e->getCode();           // SQLSTATE (ví dụ: '40001', '40P01')
+        $sqlState = $e->getCode();           // SQLSTATE ('40001', '40P01')
         $errorInfo = $e->errorInfo ?? [];     // [sqlState, driverErrorCode, message]
 
-        // Một số mã quen thuộc:
+        // Some driver-specific error codes
         // 40001: serialization failure (MySQL, Postgres)
         // 40P01: deadlock detected (Postgres)
         $retryableStates = ['40001', '40P01'];
@@ -149,13 +140,24 @@ trait AdvancedTransactional
         return false;
     }
 
-    /**
-     * Helper: lấy isolation hiện tại của session.
-     */
     protected function getCurrentSessionIsolation(): string
     {
         $row = DB::selectOne('SELECT @@SESSION.transaction_isolation AS isolation');
 
-        return $row->isolation ?? 'REPEATABLE-READ';
+        return $this->normalizeIsolation($row->isolation ?? 'REPEATABLE READ');
+    }
+
+    protected function normalizeIsolation(string $isolation): string
+    {
+        // MySQL returns isolation level as: READ-UNCOMMITTED, READ-COMMITTED, REPEATABLE-READ, SERIALIZABLE
+        $isolation = strtoupper(str_replace('-', ' ', $isolation));
+
+        return match ($isolation) {
+            'READ UNCOMMITTED',
+            'READ COMMITTED',
+            'REPEATABLE READ',
+            'SERIALIZABLE' => $isolation,
+            default => 'REPEATABLE READ', // fallback
+        };
     }
 }

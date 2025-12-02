@@ -1,3 +1,17 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+
+@keyframes rowHighlight {
+        0% {
+            background-color: hsl(127, 85%, 92%);
+        }
+        100% {
+            background-color: transparent;
+        }
+    }
+
+    .row-just-updated {
+        animation: rowHighlight 3s ease-out forwards;
+    }

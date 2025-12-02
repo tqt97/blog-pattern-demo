@@ -3,7 +3,6 @@
 namespace App\Cache\Domains;
 
 use App\Cache\Contracts\NamespacedCacheStoreInterface;
-use App\DTOs\Domains\Post\PostFilterDTO;
 use Closure;
 use DateTimeInterface;
 
@@ -36,7 +35,7 @@ class PostCache
     }
 
     /** ------- LIST (index) ------- */
-    public function rememberList(PostFilterDTO $filter, int $perPage, Closure $resolver)
+    public function rememberList(array $filter, int $perPage, Closure $resolver)
     {
         $suffixKey = $this->makeListSuffixKey($filter, $perPage);
 
@@ -53,12 +52,12 @@ class PostCache
         $this->store->flushNamespace($this->listNamespace());
     }
 
-    protected function makeListSuffixKey(PostFilterDTO $filter, int $perPage): string
+    protected function makeListSuffixKey(array $filter, int $perPage): string
     {
         $page = request()->integer('page', 1);
 
         return md5(json_encode([
-            'filters' => $filter->toArray(),
+            'filters' => $filter,
             'page' => $page,
             'perPage' => $perPage,
         ]));

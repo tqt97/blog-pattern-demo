@@ -62,4 +62,45 @@ trait HasCommonFilters
 
         $this->builder->orderBy($column, $dir);
     }
+
+    protected function whereRelationEquals(string $relation, string $column, int|string $value): void
+    {
+        $this->builder->whereHas($relation, function ($q) use ($column, $value) {
+            $q->where($column, $value);
+        });
+    }
+
+    protected function whereRelationIn(string $relation, string $column, array $values): void
+    {
+        $this->builder->whereHas($relation, function ($q) use ($column, $values) {
+            $q->whereIn($column, $values);
+        });
+    }
+
+    protected function whereRelationDateFrom(string $relation, string $column, string $value): void
+    {
+        $from = now()->parse($value)->startOfDay();
+        $this->builder->whereHas($relation, function ($q) use ($column, $from) {
+            $q->where($column, '>=', $from);
+        });
+    }
+
+    protected function applyTrashed(?string $value): void
+    {
+        if ($value === 'only') {
+            $this->builder->onlyTrashed();
+        } elseif ($value === 'with') {
+            $this->builder->withTrashed();
+        }
+    }
+
+    protected function onlyTrashed(): void
+    {
+        $this->builder->onlyTrashed();
+    }
+
+    protected function withTrashed(): void
+    {
+        $this->builder->withTrashed();
+    }
 }

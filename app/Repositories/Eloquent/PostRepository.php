@@ -2,10 +2,11 @@
 
 namespace App\Repositories\Eloquent;
 
-use App\DTOs\Post\PostFilterDTO;
-use App\Filters\Domains\PostFilters;
+use App\Enums\PostStatus;
+use App\Filters\Eloquent\Domains\Post\PostFilter;
 use App\Models\Post;
 use App\Repositories\Concerns\FilterableRepository;
+use App\Repositories\Concerns\SoftDeletesRepository;
 use App\Repositories\Contracts\PostRepositoryInterface;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
@@ -14,6 +15,7 @@ use Illuminate\Database\Eloquent\Collection;
 class PostRepository extends BaseRepository implements PostRepositoryInterface
 {
     use FilterableRepository;
+    use SoftDeletesRepository;
 
     public function __construct(Post $model)
     {
@@ -22,13 +24,14 @@ class PostRepository extends BaseRepository implements PostRepositoryInterface
 
     public function filterClass(): string
     {
-        return PostFilters::class;
+        return PostFilter::class;
     }
 
     protected function publishedQuery(): Builder
     {
         return $this->query()
-            ->where('is_published', true)
+            ->where('status', PostStatus::PUBLISHED->value)
+            ->whereNotNull('published_at')
             ->where('published_at', '<=', now());
     }
 
@@ -39,17 +42,14 @@ class PostRepository extends BaseRepository implements PostRepositoryInterface
             ->first();
     }
 
-    public function paginatePublished(int $perPage = 15): LengthAwarePaginator
+    public function paginate(array $filters): LengthAwarePaginator
     {
-        return $this->publishedQuery()
-            ->orderByDesc('published_at')
-            ->paginate($perPage);
-    }
+        $query = $this->query()
+            ->select('id', 'category_id', 'user_id', 'title', 'slug', 'thumbnail', 'status', 'published_at', 'created_at')
+            ->with(['category:id,name', 'tags:id,name', 'user:id,name']);
+        $query = $this->applyFilters($query, $filters);
 
-    public function paginate(PostFilterDTO $filter, int $perPage = 15): LengthAwarePaginator
-    {
-        $query = $this->query()->with('category');
-        $query = $this->applyFilters($query, $filter->toArray());
+        $perPage = $filters['per_page'] ?? null;
 
         return $query->paginate($perPage);
     }
@@ -99,5 +99,28 @@ class PostRepository extends BaseRepository implements PostRepositoryInterface
             ->orderByDesc('published_at')
             ->limit($limit)
             ->get();
+    }
+
+    public function bulkDelete(array $ids): void
+    {
+        $this->query()
+            ->whereIn('id', $ids)
+            ->delete(); // soft delete
+    }
+
+    public function bulkRestore(array $ids): void
+    {
+        $this->query()
+            ->onlyTrashed()
+            ->whereIn('id', $ids)
+            ->restore();
+    }
+
+    public function bulkForceDelete(array $ids): void
+    {
+        $this->query()
+            ->withTrashed()
+            ->whereIn('id', $ids)
+            ->forceDelete();
     }
 }

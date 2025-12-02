@@ -20,4 +20,9 @@ class Tag extends Model
     {
         return $this->belongsToMany(Post::class);
     }
+
+    public function scopeOptions($query): array
+    {
+        return $query->orderBy('name')->pluck('name', 'id')->toArray();
+    }
 }

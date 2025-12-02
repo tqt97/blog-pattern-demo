@@ -30,12 +30,13 @@ class SendPostCreatedNotification implements ShouldQueue
 
         // Tuỳ hệ thống anh phân quyền như nào:
         // ví dụ đơn giản: user có is_admin = true
-        $admins = User::where('is_admin', true)->get();
+        // $admins = User::where('is_admin', true)->get();
+        $users = User::all();
 
-        if ($admins->isEmpty()) {
+        if ($users->isEmpty()) {
             return;
         }
 
-        Notification::send($admins, new NewPostCreatedNotification($post));
+        Notification::send($users, new NewPostCreatedNotification($post));
     }
 }

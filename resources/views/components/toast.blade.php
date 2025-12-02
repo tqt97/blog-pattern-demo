@@ -6,7 +6,7 @@
     x-transition:enter="transform ease-out duration-300 transition" x-transition:enter-start="translate-y-2 opacity-0"
     x-transition:enter-end="translate-y-0 opacity-100" x-transition:leave="transform ease-in duration-300 transition"
     x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0 translate-y-2"
-    {{ $attributes->merge(['class' => 'flex items-start justify-between gap-1 w-80 p-3 rounded-lg shadow-lg border']) }}>
+    {{ $attributes->merge(['class' => 'z-100 flex items-start justify-between gap-1 w-80 p-3 rounded-lg shadow-lg border']) }}>
 
     <div class="flex items-center gap-1">
         {{-- Icon --}}
