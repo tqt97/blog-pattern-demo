@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\UploadController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -37,3 +38,7 @@ Route::resource('blog', PostController::class)
 //     ->name('posts.publish')
 //     ->middleware('can:publish,post'); // <- check quyền tại route
 // });
+
+Route::post('/upload/image/{type}', [UploadController::class, 'store'])->name('upload.image');
+Route::delete('/upload/image/{type}', [UploadController::class, 'destroy'])
+    ->name('upload.image.destroy');

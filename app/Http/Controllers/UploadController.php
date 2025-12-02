@@ -16,10 +16,6 @@ class UploadController extends Controller
 
     public function store(Request $request, string $type): JsonResponse
     {
-        // $request->validate([
-        //     'file' => $this->uploader->rulesFor($type),
-        // ]);
-
         try {
             $request->validate([
                 'file' => $this->uploader->rulesFor($type),

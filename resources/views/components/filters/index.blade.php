@@ -1,8 +1,8 @@
 @props([
     'action',
-    'baseExcept' => ['page'], // luôn bỏ page
+    'baseExcept' => ['page'],
 ])
 
-<div {{ $attributes->merge(['class' => 'w-full flex items-center justify-between gap-2']) }}>
+<div {{ $attributes->merge(['class' => '']) }}>
     {{ $slot }}
 </div>

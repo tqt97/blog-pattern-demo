@@ -1,5 +1,4 @@
-<x-filters.form :except="['q']" class="rounded-sm flex items-center gap-2" x-data
-    >
+<x-filters.form :except="['q']" class="rounded-sm flex items-center gap-1" x-data>
     <div class="relative flex-1 rounded-md shadow-sm">
         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
             <x-icons.search />
