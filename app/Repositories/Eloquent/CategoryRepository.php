@@ -25,7 +25,8 @@ class CategoryRepository extends BaseRepository implements CategoryRepositoryInt
 
     public function paginate(CategoryFilterDTO $filter): LengthAwarePaginator
     {
-        $query = $this->query()->select(['id', 'name', 'description', 'created_at']);
+        $query = $this->query()->select(['id', 'name', 'description', 'created_at'])
+            ->withCount(['posts']);
         $query = $this->applyFilters($query, $filter->toArray());
 
         return $query->paginate($filter->perPage);
