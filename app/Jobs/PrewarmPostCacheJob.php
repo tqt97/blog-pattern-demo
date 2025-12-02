@@ -3,7 +3,6 @@
 namespace App\Jobs;
 
 use App\Cache\Domains\PostCache;
-use App\DTOs\Post\PostFilter;
 use App\Repositories\Contracts\PostRepositoryInterface;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -27,12 +26,13 @@ class PrewarmPostCacheJob implements ShouldQueue
     public function handle(PostCache $cache, PostRepositoryInterface $postRepository): void
     {
         // 1. Prewarm list trang 1 với filter mặc định
-        $filter = new PostFilter; // hoặc PostFilter::default()
+        // $filter = new PostFilter; // hoặc PostFilter::default()
+        $filter = [];
 
         $cache->rememberList(
             $filter,
             15,
-            fn () => $postRepository->paginate($filter, 15)
+            fn () => $postRepository->paginate($filter)
         );
 
         // 2. Prewarm sidebar
