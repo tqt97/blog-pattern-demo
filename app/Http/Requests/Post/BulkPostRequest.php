@@ -32,14 +32,17 @@ class BulkPostRequest extends FormRequest
     {
         $rawIds = $this->input('ids');
 
-        if (! $rawIds) {
-            return;
+        if (is_string($rawIds)) {
+            $ids = collect(explode(',', $rawIds));
+        } elseif (is_array($rawIds)) {
+            $ids = collect($rawIds);
+        } else {
+            $ids = collect();
         }
 
-        $ids = collect(explode(',', (string) $rawIds))
-            ->map(fn ($id) => trim($id))
-            ->filter()               // bỏ rỗng
-            ->map(fn ($id) => (int) $id)
+        $ids = $ids
+            ->map(fn ($id) => (int) trim((string) $id))
+            ->filter()
             ->unique()
             ->values()
             ->all();
